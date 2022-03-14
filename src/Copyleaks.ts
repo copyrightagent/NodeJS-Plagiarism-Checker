@@ -143,7 +143,7 @@ export class Copyleaks {
       if(retries < 1) {
         throw error;
       }
-      if(error.response && [ 429, 500 ].includes(error.response.status)) {
+      if(error.response && [ 429, 500, 502 ].includes(error.response.status)) {
         await new Promise((resolve) => setTimeout(resolve, backoff));
         return await this.request(config, retries - 1, backoff * 2);
       }
