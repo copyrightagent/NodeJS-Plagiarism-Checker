@@ -144,6 +144,7 @@ export class Copyleaks {
         throw error;
       }
       if(error.response && [ 429, 500, 502 ].includes(error.response.status)) {
+        console.log('copyleaks backoff', JSON.stringify(config))
         await new Promise((resolve) => setTimeout(resolve, backoff));
         return await this.request(config, retries - 1, backoff * 2);
       }
