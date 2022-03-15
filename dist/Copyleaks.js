@@ -140,10 +140,12 @@ class Copyleaks {
                 return yield this.api(config);
             }
             catch (error) {
+                console.log('copyleaks request error', error.response && error.response.status, { retries, backoff });
                 if (retries < 1) {
                     throw error;
                 }
                 if (error.response && [429, 500, 502].includes(error.response.status)) {
+                    console.log('copyleaks backoff', JSON.stringify(config));
                     yield new Promise((resolve) => setTimeout(resolve, backoff));
                     return yield this.request(config, retries - 1, backoff * 2);
                 }
