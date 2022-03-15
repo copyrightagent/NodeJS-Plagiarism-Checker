@@ -5,6 +5,7 @@ import { CopyleaksAuthToken } from './models/response';
 import { CopyleaksFileOcrSubmissionModel, CopyleaksFileSubmissionModel, CopyleaksURLSubmissionModel } from './models/submissions';
 export declare class Copyleaks {
     private api;
+    private accountApi;
     constructor();
     /**
      * Login to Copyleaks authentication server.
@@ -19,7 +20,7 @@ export declare class Copyleaks {
      * @param key Copyleaks account secret key.
      * @returns A authentication token that being expired after certain amount of time.
      */
-    loginAsync(email: string, key: string): Promise<CopyleaksAuthToken>;
+    loginAsync(email: string, key: string): Promise<any>;
     /**
      * Verify that Copyleaks authentication token is exists and not exipired.
      * * Exceptions:

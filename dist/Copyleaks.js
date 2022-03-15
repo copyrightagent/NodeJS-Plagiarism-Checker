@@ -46,6 +46,13 @@ class Copyleaks {
                 'User-Agent': app_config_1.CopyleaksConfig.USER_AGENT,
             }
         });
+        this.accountApi = axios_1.default.create({
+            baseURL: `${app_config_1.CopyleaksConfig.IDENTITY_SERVER_URI}`,
+            headers: {
+                'Content-Type': 'application/json',
+                'User-Agent': app_config_1.CopyleaksConfig.USER_AGENT,
+            }
+        });
     }
     /**
      * Login to Copyleaks authentication server.
@@ -63,16 +70,15 @@ class Copyleaks {
     loginAsync(email, key) {
         return __awaiter(this, void 0, void 0, function* () {
             // missing args check
-            const url = `${app_config_1.CopyleaksConfig.IDENTITY_SERVER_URI}/v3/account/login/api`;
             const payload = {
                 email,
                 key
             };
-            const headers = {
-                'Content-Type': 'application/json',
-                'User-Agent': app_config_1.CopyleaksConfig.USER_AGENT
-            };
-            const response = yield axios_1.default.post(url, payload, { headers });
+            const response = yield this.request({
+                method: 'POST',
+                url: `/v3/account/login/api`,
+                data: payload,
+            }, this.accountApi);
             if (utils_1.isSuccessStatusCode(response.status)) {
                 return response.data;
             }
@@ -134,10 +140,10 @@ class Copyleaks {
             }
         });
     }
-    request(config, retries = 10, backoff = 2000) {
+    request(config, requester = this.api, retries = 10, backoff = 2000) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                return yield this.api(config);
+                return yield requester(config);
             }
             catch (error) {
                 console.log('copyleaks request error', error.response && error.response.status, { retries, backoff });
@@ -147,7 +153,7 @@ class Copyleaks {
                 if (error.response && [429, 500, 502].includes(error.response.status)) {
                     console.log('copyleaks backoff', JSON.stringify(config));
                     yield new Promise((resolve) => setTimeout(resolve, backoff));
-                    return yield this.request(config, retries - 1, backoff * 2);
+                    return yield this.request(config, requester, retries - 1, backoff * 2);
                 }
                 throw error;
             }
