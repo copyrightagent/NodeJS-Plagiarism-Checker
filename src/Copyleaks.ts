@@ -34,6 +34,7 @@ import { isRateLimitResponse, isSuccessStatusCode, isUnderMaintenanceResponse } 
 
 export class Copyleaks {
   private api: AxiosInstance;
+  private accountApi: AxiosInstance;
 
   constructor() {
     this.api = axios.create({
@@ -43,6 +44,14 @@ export class Copyleaks {
         'User-Agent': CopyleaksConfig.USER_AGENT,
       }
     });
+
+    this.accountApi = axios.create({
+      baseURL: `${CopyleaksConfig.IDENTITY_SERVER_URI}`,
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': CopyleaksConfig.USER_AGENT,
+      }
+    })
   }
 
   /**
@@ -61,17 +70,15 @@ export class Copyleaks {
   public async loginAsync(email: string, key: string) {
     // missing args check
 
-    const url = `${CopyleaksConfig.IDENTITY_SERVER_URI}/v3/account/login/api`;
     const payload = {
       email,
       key
     }
-    const headers = {
-      'Content-Type': 'application/json',
-      'User-Agent': CopyleaksConfig.USER_AGENT
-    }
-
-    const response = await axios.post<CopyleaksAuthToken>(url, payload, { headers });
+    const response = await this.request({
+      method: 'POST',
+      url: `/v3/account/login/api`,
+      data: payload,
+    }, this.accountApi);
 
     if (isSuccessStatusCode(response.status)) {
       return response.data;
@@ -135,9 +142,9 @@ export class Copyleaks {
     }
   }
 
-  private async request(config: AxiosRequestConfig, retries: number = 10, backoff: number = 2000): Promise<any> {
+  private async request(config: AxiosRequestConfig, requester: AxiosInstance = this.api, retries: number = 10, backoff: number = 2000): Promise<any> {
     try {
-      return await this.api(config);
+      return await requester(config);
     }
     catch(error: any) {
       console.log('copyleaks request error', error.response && error.response.status, { retries, backoff });
@@ -147,7 +154,7 @@ export class Copyleaks {
       if(error.response && [ 429, 500, 502 ].includes(error.response.status)) {
         console.log('copyleaks backoff', JSON.stringify(config));
         await new Promise((resolve) => setTimeout(resolve, backoff));
-        return await this.request(config, retries - 1, backoff * 2);
+        return await this.request(config, requester, retries - 1, backoff * 2);
       }
       throw error;
     }
