@@ -27,7 +27,7 @@ export declare class Copyleaks {
      *  * AuthExipredException: authentication expired. Need to login again.
      * @param authToken Copyleaks authentication token
      */
-    verifyAuthToken(authToken: CopyleaksAuthToken): void;
+    verifyAuthToken(authToken: CopyleaksAuthToken, timeUntilExpiry?: number): void;
     /**
      * Starting a new process by providing a file to scan.
      * For more info:
