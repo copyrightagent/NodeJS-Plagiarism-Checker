@@ -126,13 +126,19 @@ export class Copyleaks {
   public async submitFileAsync(product: 'education' | 'businesses', authToken: CopyleaksAuthToken, scanId: string, submission: CopyleaksFileSubmissionModel) {
     this.verifyAuthToken(authToken);
 
-    const response = await this.request({
-      method: 'PUT',
-      url: `/v3/${product}/submit/file/${scanId}`,
-      data: submission,
-      headers: { 'Authorization': `Bearer ${authToken['access_token']}` },
-      maxBodyLength: Infinity
-    });
+    let response
+    try {
+      response = await this.request({
+        method: 'PUT',
+        url: `/v3/${product}/submit/file/${scanId}`,
+        data: submission,
+        headers: { 'Authorization': `Bearer ${authToken['access_token']}` },
+        maxBodyLength: Infinity
+      });
+    }
+    catch(error) {
+      throw new Error(`Failed to submit file to Copyleaks API for scan with ID '${scanId}'.`, { cause: error });
+    }
     if (isSuccessStatusCode(response.status))
       return; // Completed successfully
     else if (isUnderMaintenanceResponse(response.status)) {
