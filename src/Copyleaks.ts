@@ -95,10 +95,10 @@ export class Copyleaks {
    *  * AuthExipredException: authentication expired. Need to login again.
    * @param authToken Copyleaks authentication token
    */
-  public verifyAuthToken(authToken: CopyleaksAuthToken) {
+  public verifyAuthToken(authToken: CopyleaksAuthToken, timeUntilExpiry: number = 5) {
 
     const date = new Date(Date.now());
-    date.setMinutes(date.getMinutes() + 5); // adds 5 minutes ahead for a safety shield.
+    date.setMinutes(date.getMinutes() + timeUntilExpiry); // adds 5 minutes ahead for a safety shield.
 
     const expiresDate = new Date(authToken['.expires']);
 
