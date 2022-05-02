@@ -156,7 +156,7 @@ class Copyleaks {
                 if (retries < 1) {
                     throw error;
                 }
-                if (error.response && [429, 500, 502].includes(error.response.status)) {
+                if (error.response && ([429, 500, 502].includes(error.response.status) || error.code === 'ETIMEDOUT')) {
                     console.log('copyleaks backoff', JSON.stringify(config));
                     yield new Promise((resolve) => setTimeout(resolve, backoff));
                     return yield this.request(config, requester, retries - 1, backoff * 2);
